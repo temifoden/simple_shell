@@ -1,5 +1,12 @@
 #include "main.h"
 #include "_stdlib.h"
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 /**
  * isdelim - determines whether a char is a delimiter character or not
@@ -29,8 +36,10 @@ char **tokenize(char *str)
 			tc++; /* increment token count */
 		}
 	}
+	if (tc == 0)
+		return (NULL);
 
-	/* allocat just enough memory to store the tokens (just pointers to them); */
+	/* allocate just enough memory to store the tokens (just pointers to them); */
 	tokens = malloc(sizeof(char *) * (tc + 1));
 	if (!tokens) /* malloc failed, nooooooooo!!! */
 		return (NULL);
@@ -48,21 +57,41 @@ char **tokenize(char *str)
 
 	return (tokens);
 }
+
+int execute(char *command, char **args)
+{
+	pid_t pid;
+	pid = fork();
+	if (pid == 0)
+	{
+		execve(command, args, environ);
+		return(1);
+	}
+	else if (pid == -1)
+	{
+		return (-1);
+	}
+	else
+	{
+		if (wait(NULL) == -1)
+			return (-1);
+	}
+	return (0);
+}
+
 /**
  * main - entry point into this awesome shell
  * @ac: number of command line args
  * @av: the command line args
  * Return: 0 on success, appropriate error no on fail
  */
-int main(int ac, __attribute__((__unused__)) char **av)
+int main(int ac,  char **av)
 {
 	char *lineptr = NULL; /* getline stores the line from stdin here */
 	size_t n = 0; /* size of buffer(lineptr) allocated to store line. getline updates it accordingly */
 	ssize_t len; /* no of chars read by getline */
-
 	char **tokens = NULL; /*array of tokens gotten from tokenize. */
-
-	int i; /* variable to use in loops */
+	int execstatus;
 
 	if (ac > 1) /* passing the shell a script (a file)*/
 	{
@@ -82,20 +111,32 @@ int main(int ac, __attribute__((__unused__)) char **av)
 	while (len != -1) /* getline returns -1 when it reaches eof */
 	{
 		tokens = tokenize(lineptr);
-		if (*tokens == NULL) /* user entered nothing */
+		if (tokens == NULL)
 		{
-			continue;
+			if (len > 1) /* hmmm */
+			{
+				perror(av[0]);
+			}
+			goto reprompt;
 		}
 
-		/* printf out the tokens to test our awesome function */
-		for (i = 0; tokens[i]; i++)
+		execstatus = execute(tokens[0], tokens);
+		if (execstatus == 1)
 		{
-			printf("%d: %s \n", i, tokens[i]);
+			perror(av[0]);
+			goto exit;
 		}
+		else if (execstatus == -1)
+			perror(av[0]);
 
+reprompt:
+		free(tokens);
+		tokens = NULL; /* precaution */
 		printf("$ "); /* prompt the user again and again */
 		len = getline(&lineptr, &n, stdin);
 	}
-
+exit:
+	free(tokens);
+	free(lineptr);
 	return (0);
 }
