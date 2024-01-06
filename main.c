@@ -1,12 +1,11 @@
 #include "main.h"
 #include "_stdlib.h"
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/wait.h>
+
+typedef struct shell_properties/* to be moved to main.h */
+{
+	char *prog_name;
+	int isatty;
+} shell_properties;
 
 /**
  * isdelim - determines whether a char is a delimiter character or not
@@ -23,7 +22,7 @@ int isdelim(char c)
  * @str: the string
  * Return: a pointer to an array of strings(the tokens), NULL on fail
  */
-char **tokenize(char *str)
+char **tokenize(shell_properties sh, char *str)
 {
 	char **tokens = NULL;
 	int tc = 0; /* token count */
@@ -42,7 +41,10 @@ char **tokenize(char *str)
 	/* allocate just enough memory to store the tokens (just pointers to them); */
 	tokens = malloc(sizeof(char *) * (tc + 1));
 	if (!tokens) /* malloc failed, nooooooooo!!! */
+	{
+		perror(sh.prog_name);
 		return (NULL);
+	}
 
 	i = 0; /* make sure to init variable before using in the loop */
 	tokens[i] = strtok(str, " \n\t"); /* get the first token */
@@ -58,23 +60,29 @@ char **tokenize(char *str)
 	return (tokens);
 }
 
-int execute(char *command, char **args)
+int execute(shell_properties sh, char *command, char **args)
 {
 	pid_t pid;
+
 	pid = fork();
 	if (pid == 0)
 	{
 		execve(command, args, environ);
-		return(1);
+		perror(sh.prog_name);
+		return (1);
 	}
 	else if (pid == -1)
 	{
+		perror(sh.prog_name);
 		return (-1);
 	}
 	else
 	{
 		if (wait(NULL) == -1)
+		{
+			perror(sh.prog_name);
 			return (-1);
+		}
 	}
 	return (0);
 }
@@ -88,18 +96,19 @@ int execute(char *command, char **args)
 int main(int ac,  char **av)
 {
 	char *lineptr = NULL; /* getline stores the line from stdin here */
-	size_t n = 0; /* size of buffer(lineptr) allocated to store line. getline updates it accordingly */
+	size_t n = 0; /* size of buffer(lineptr). getline updates it accordingly */
 	ssize_t len; /* no of chars read by getline */
 	char **tokens = NULL; /*array of tokens gotten from tokenize. */
-	int execstatus;
+	shell_properties sh;
 
+	sh.prog_name = av[0];
+	sh.isatty = isatty(STDIN_FILENO);
 	if (ac > 1) /* passing the shell a script (a file)*/
 	{
 		_puts("file execution not constructed, come back later");
 		return (0);
 	}
-
-	if (!isatty(STDIN_FILENO)) /* running shell by piping input into it */
+	if (!sh.isatty) /* running shell by piping input into it */
 	{
 		_puts("pipes not constructed, come back later");
 		return (0);
@@ -110,24 +119,11 @@ int main(int ac,  char **av)
 	len = getline(&lineptr, &n, stdin);
 	while (len != -1) /* getline returns -1 when it reaches eof */
 	{
-		tokens = tokenize(lineptr);
+		tokens = tokenize(sh, lineptr);
 		if (tokens == NULL)
-		{
-			if (len > 1) /* hmmm */
-			{
-				perror(av[0]);
-			}
 			goto reprompt;
-		}
-
-		execstatus = execute(tokens[0], tokens);
-		if (execstatus == 1)
-		{
-			perror(av[0]);
-			goto exit;
-		}
-		else if (execstatus == -1)
-			perror(av[0]);
+		if (execute(sh, tokens[0], tokens) == 1)
+			break;
 
 reprompt:
 		free(tokens);
@@ -135,7 +131,8 @@ reprompt:
 		printf("$ "); /* prompt the user again and again */
 		len = getline(&lineptr, &n, stdin);
 	}
-exit:
+	if (len == -1)
+		_puts("");
 	free(tokens);
 	free(lineptr);
 	return (0);
