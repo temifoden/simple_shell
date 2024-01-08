@@ -1,5 +1,8 @@
 #include "main.h"
 #include "_stdlib.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 typedef struct shell_properties/* to be moved to main.h */
 {
@@ -63,7 +66,6 @@ char **tokenize(shell_properties sh, char *str)
 int execute(shell_properties sh, char *command, char **args)
 {
 	pid_t pid;
-
 	pid = fork();
 	if (pid == 0)
 	{
@@ -88,6 +90,62 @@ int execute(shell_properties sh, char *command, char **args)
 }
 
 /**
+ * start_with - checks if command starts with another string
+ * @string: the string characters
+ * @start: begining string
+*/
+
+int start_with(char *string, char *start)
+{
+	int i;
+	for (i = 0; (string[i] != '\0' && start[i] != '\0'); i++)
+	{
+		if(string[i] != start[i])
+			return(0);
+	}
+	return(start[i]== '\0');
+}
+
+
+/**
+ * findCommand - entry
+ * @sh: our struct
+ * @command: command string
+*/
+
+char *findCommand(shell_properties sh, char *command)
+{
+	struct stat st;
+	char * path_copy;
+	if (start_with(command, "/") || start_with(command, "../") || start_with(command, "./"))
+	{
+		if(stat(command, &st) == -1)
+		{
+			perror(sh.prog_name);
+			return(NULL);
+		}
+		return(command);
+	}
+	/*please work on this*/
+	if (!getenv("SHELL") );
+	{
+		printf("The path could not be found\n");
+		return (NULL);
+	}
+	path_copy = malloc(sizeof (char) * (_strlen(getenv("SHELL")) + 1));
+
+	if (path_copy == NULL)
+	{
+		perror(sh.prog_name);
+		return (NULL);
+	}
+
+	strcpy(path_copy, getenv("SHELL"));
+	printf("%s \n",path_copy);
+	return(command);
+}
+
+/**
  * main - entry point into this awesome shell
  * @ac: number of command line args
  * @av: the command line args
@@ -99,6 +157,7 @@ int main(int ac,  char **av)
 	size_t n = 0; /* size of buffer(lineptr). getline updates it accordingly */
 	ssize_t len; /* no of chars read by getline */
 	char **tokens = NULL; /*array of tokens gotten from tokenize. */
+	char *command = NULL;
 	shell_properties sh;
 
 	sh.prog_name = av[0];
@@ -122,7 +181,12 @@ int main(int ac,  char **av)
 		tokens = tokenize(sh, lineptr);
 		if (tokens == NULL)
 			goto reprompt;
-		if (execute(sh, tokens[0], tokens) == 1)
+		if (strcmp("exit", tokens[0]) == 0)
+			break;
+		command = findCommand(sh, tokens[0]);
+		if (command == NULL)
+			goto reprompt;
+		if (execute(sh, command, tokens) == 1)
 			break;
 
 reprompt:
