@@ -1,14 +1,12 @@
 #include "main.h"
 #include "_stdlib.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
-typedef struct shell_properties/* to be moved to main.h */
+typedef struct shell_properties
 {
 	char *prog_name;
 	int isatty;
 } shell_properties;
+
 
 /**
  * isdelim - determines whether a char is a delimiter character or not
@@ -106,17 +104,17 @@ int start_with(char *string, char *start)
 	return(start[i]== '\0');
 }
 
-
 /**
  * findCommand - entry
  * @sh: our struct
  * @command: command string
 */
-
 char *findCommand(shell_properties sh, char *command)
 {
 	struct stat st;
-	char * path_copy;
+	char *path_copy;
+	char *dir_path;
+	char *full_path;
 	if (start_with(command, "/") || start_with(command, "../") || start_with(command, "./"))
 	{
 		if(stat(command, &st) == -1)
@@ -127,22 +125,48 @@ char *findCommand(shell_properties sh, char *command)
 		return(command);
 	}
 	/*please work on this*/
-	if (!getenv("SHELL") );
+	if (!_getenv("PATH"))
 	{
 		printf("The path could not be found\n");
 		return (NULL);
 	}
-	path_copy = malloc(sizeof (char) * (_strlen(getenv("SHELL")) + 1));
-
+	path_copy = malloc(sizeof (char) * (_strlen(_getenv("PATH")) + 1));
 	if (path_copy == NULL)
 	{
 		perror(sh.prog_name);
 		return (NULL);
 	}
 
-	strcpy(path_copy, getenv("SHELL"));
-	printf("%s \n",path_copy);
-	return(command);
+	_strcpy(path_copy, _getenv("PATH"));
+
+	dir_path = strtok(path_copy, ":");
+	while (dir_path != NULL)
+	{
+		full_path = malloc(sizeof(char) * (_strlen(dir_path) + _strlen(command) + 2));
+		if (!full_path)
+		{
+			perror(sh.prog_name);
+			free(path_copy);
+			return (NULL);
+		}
+		full_path[0] = '\0';
+		_strncat(full_path, dir_path, _strlen(dir_path));
+		_strncat(full_path, "/", 1);
+		_strncat(full_path, command, _strlen(command));
+		if(stat(full_path, &st) == 0)
+		{
+			free(path_copy);
+			return(full_path);
+		}
+		
+		free(full_path);
+		full_path = NULL;
+		dir_path = strtok(NULL, ":");
+	}
+	perror(sh.prog_name);
+	free(path_copy);
+	free(full_path);
+	return(NULL);
 }
 
 /**
@@ -159,6 +183,8 @@ int main(int ac,  char **av)
 	char **tokens = NULL; /*array of tokens gotten from tokenize. */
 	char *command = NULL;
 	shell_properties sh;
+
+	int i;
 
 	sh.prog_name = av[0];
 	sh.isatty = isatty(STDIN_FILENO);
@@ -183,6 +209,12 @@ int main(int ac,  char **av)
 			goto reprompt;
 		if (strcmp("exit", tokens[0]) == 0)
 			break;
+		if (strcmp("env", tokens[0]) == 0)
+		{
+			for(i = 0; environ[i]; i++)
+				puts(environ[i]);
+
+		}
 		command = findCommand(sh, tokens[0]);
 		if (command == NULL)
 			goto reprompt;
@@ -190,6 +222,9 @@ int main(int ac,  char **av)
 			break;
 
 reprompt:
+		if (command != tokens[0])
+			free(command);
+		command = NULL;
 		free(tokens);
 		tokens = NULL; /* precaution */
 		printf("$ "); /* prompt the user again and again */
@@ -197,6 +232,9 @@ reprompt:
 	}
 	if (len == -1)
 		_puts("");
+
+	if (command != tokens[0])
+		free(command);
 	free(tokens);
 	free(lineptr);
 	return (0);

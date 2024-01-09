@@ -13,6 +13,12 @@ main
             continue
             execute
 
+## _stdlib todo
+# Temitayo
+_strncat
+strcmp
+_strlen
 
-
-/bin/ls -a
+# peter
+getenv
+strtok
