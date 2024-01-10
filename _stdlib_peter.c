@@ -2,6 +2,24 @@
 #include "_stdlib.h"
 
 /**
+ * start_with - checks if command starts with another string
+ * @string: the string characters
+ * @start: begining string
+ * Return: 1 if starts with, 0if not
+*/
+int start_with(char *string, char *start)
+{
+	int i;
+
+	for (i = 0; (string[i] != '\0' && start[i] != '\0'); i++)
+	{
+		if (string[i] != start[i])
+			return (0);
+	}
+	return (start[i] == '\0');
+}
+
+/**
  * _getenv - searches the environment list for a variable name.
  * @name: the name of the variable
  * Return: a pointer to the value of the variable, NULL if not found

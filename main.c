@@ -91,23 +91,6 @@ int execute(shell_properties sh, char *command, char **args)
 	return (0);
 }
 
-/**
- * start_with - checks if command starts with another string
- * @string: the string characters
- * @start: begining string
- * Return: 1 if starts with, 0if not
-*/
-int start_with(char *string, char *start)
-{
-	int i;
-
-	for (i = 0; (string[i] != '\0' && start[i] != '\0'); i++)
-	{
-		if (string[i] != start[i])
-			return (0);
-	}
-	return (start[i] == '\0');
-}
 
 /**
  * findCommand - entry
