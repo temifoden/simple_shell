@@ -2,7 +2,7 @@
 #include "_stdlib.h"
 
 /**
- * _getenv - searches the environment list for a variable name, returns a pointer to its value.
+ * _getenv - searches the environment list for a variable name.
  * @name: the name of the variable
  * Return: a pointer to the value of the variable, NULL if not found
  */

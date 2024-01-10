@@ -1,11 +1,6 @@
 #include "main.h"
 #include "_stdlib.h"
 
-typedef struct shell_properties
-{
-	char *prog_name;
-	int isatty;
-} shell_properties;
 
 
 /**
@@ -21,6 +16,7 @@ int isdelim(char c)
 /**
  * tokenize - return an array of tokens from a string
  * @str: the string
+ * @sh: shell properties, for perror
  * Return: a pointer to an array of strings(the tokens), NULL on fail
  */
 char **tokenize(shell_properties sh, char *str)
@@ -61,9 +57,17 @@ char **tokenize(shell_properties sh, char *str)
 	return (tokens);
 }
 
+/**
+ * execute - executes a program(fork and execve)
+ * @command: the command
+ * @args: the command line args into the program
+ * @sh: shell properties, for perror
+ * Return: 0 if success, -1 if error, 1 if error doing execve
+*/
 int execute(shell_properties sh, char *command, char **args)
 {
 	pid_t pid;
+
 	pid = fork();
 	if (pid == 0)
 	{
@@ -91,37 +95,41 @@ int execute(shell_properties sh, char *command, char **args)
  * start_with - checks if command starts with another string
  * @string: the string characters
  * @start: begining string
+ * Return: 1 if starts with, 0if not
 */
 int start_with(char *string, char *start)
 {
 	int i;
+
 	for (i = 0; (string[i] != '\0' && start[i] != '\0'); i++)
 	{
-		if(string[i] != start[i])
-			return(0);
+		if (string[i] != start[i])
+			return (0);
 	}
-	return(start[i]== '\0');
+	return (start[i] == '\0');
 }
 
 /**
  * findCommand - entry
- * @sh: our struct
+ * @sh: shell properties, for perror
  * @command: command string
+ * Return: full path to the command, NULL if not found
 */
 char *findCommand(shell_properties sh, char *command)
 {
 	struct stat st;
-	char *path_copy;
-	char *dir_path;
-	char *full_path;
-	if (start_with(command, "/") || start_with(command, "../") || start_with(command, "./"))
+	char *path_copy, *dir_path, *full_path;
+
+	if (start_with(command, "/")
+			|| start_with(command, "../")
+			|| start_with(command, "./"))
 	{
-		if(stat(command, &st) == -1)
+		if (stat(command, &st) == -1)
 		{
 			perror(sh.prog_name);
-			return(NULL);
+			return (NULL);
 		}
-		return(command);
+		return (command);
 	}
 	/*please work on this*/
 	if (!_getenv("PATH"))
@@ -129,7 +137,7 @@ char *findCommand(shell_properties sh, char *command)
 		_puts("The path could not be found\n");
 		return (NULL);
 	}
-	path_copy = malloc(sizeof (char) * (_strlen(_getenv("PATH")) + 1));
+	path_copy = malloc(sizeof(char) * (_strlen(_getenv("PATH")) + 1));
 	if (path_copy == NULL)
 	{
 		perror(sh.prog_name);
@@ -141,7 +149,8 @@ char *findCommand(shell_properties sh, char *command)
 	dir_path = strtok(path_copy, ":");
 	while (dir_path != NULL)
 	{
-		full_path = malloc(sizeof(char) * (_strlen(dir_path) + _strlen(command) + 2));
+		full_path = malloc(sizeof(char)
+				* (_strlen(dir_path) + _strlen(command) + 2));
 		if (!full_path)
 		{
 			perror(sh.prog_name);
@@ -152,12 +161,12 @@ char *findCommand(shell_properties sh, char *command)
 		_strncat(full_path, dir_path, _strlen(dir_path));
 		_strncat(full_path, "/", 1);
 		_strncat(full_path, command, _strlen(command));
-		if(stat(full_path, &st) == 0)
+		if (stat(full_path, &st) == 0)
 		{
 			free(path_copy);
-			return(full_path);
+			return (full_path);
 		}
-		
+
 		free(full_path);
 		full_path = NULL;
 		dir_path = strtok(NULL, ":");
@@ -165,7 +174,7 @@ char *findCommand(shell_properties sh, char *command)
 	perror(sh.prog_name);
 	free(path_copy);
 	free(full_path);
-	return(NULL);
+	return (NULL);
 }
 
 /**
@@ -206,7 +215,7 @@ int main(int ac,  char **av)
 			break;
 		if (_strcmp("env", tokens[0]) == 0)
 		{
-			for(i = 0; environ[i]; i++)
+			for (i = 0; environ[i]; i++)
 			{
 				_puts(environ[i]);
 				_puts("\n");

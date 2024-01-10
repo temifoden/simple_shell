@@ -10,7 +10,8 @@
 size_t _strlen(const char *s)
 {
 	size_t length = 0;
-	while(*s != '\0')
+
+	while (*s != '\0')
 	{
 		length++;
 		s++;
@@ -32,16 +33,18 @@ void _puts(const char *str)
  * _strncat - concatenates two strings
  * @dest: the destination string
  * @src: the source string
- * @n: number of required string from source to the resulting concatenated string
+ * @n: max number of bytes to be concated
+ * Return: a pointer to dest;
 */
 char *_strncat(char *dest, const char *src, size_t n)
 {
 	char *original_dest = dest;
 	size_t i;
+
 	i = 0;
 	while (*dest != '\0')
 	{
-	dest++;	
+		dest++;
 	}
 	while (*src != '\0')
 	{
@@ -61,9 +64,16 @@ char *_strncat(char *dest, const char *src, size_t n)
 	return (original_dest);
 }
 
+/**
+ * _strcpy - copies a string into dest
+ * @dest: the destination string
+ * @src: the source string
+ * Return: a pointer to dest;
+*/
 char *_strcpy(char *dest, const char *src)
 {
 	size_t i = 0;
+
 	for (i = 0; src[i]; i++)
 	{
 		dest[i] = src[i];
@@ -76,7 +86,7 @@ char *_strcpy(char *dest, const char *src)
  * _strcmp - compares two strings
  * @s1: the first string
  * @s2: the second string
- * 
+ *
  * Return: An integer
 */
 int _strcmp(const char *s1, const char *s2)
