@@ -221,7 +221,7 @@ int main(int ac,  char **av)
 			break;
 
 reprompt:
-		if (command != tokens[0])
+		if (tokens && command != tokens[0])
 			free(command);
 		command = NULL;
 		free(tokens);
@@ -232,7 +232,7 @@ reprompt:
 	if (len == -1)
 		_puts("");
 
-	if (command != tokens[0])
+	if (tokens && command != tokens[0])
 		free(command);
 	free(tokens);
 	free(lineptr);

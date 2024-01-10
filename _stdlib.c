@@ -1,4 +1,5 @@
 #include "main.h"
+#include <string.h>
 
 /**
  * _strlen - returns the length of a string
@@ -7,6 +8,7 @@
  */
 size_t _strlen(const char *s)
 {
+	/*
 	size_t length = 0;
 	while(*s != '\0')
 	{
@@ -14,6 +16,8 @@ size_t _strlen(const char *s)
 		s++;
 	}
 	return (length);
+	*/
+	return (strlen(s));
 }
 
 /**
@@ -35,6 +39,7 @@ void _puts(const char *str)
 */
 char *_strncat(char *dest, const char *src, size_t n)
 {
+	/*
 	char *original_dest = dest;
 	size_t i;
 	i = 0;
@@ -42,7 +47,6 @@ char *_strncat(char *dest, const char *src, size_t n)
 	{
 	dest++;	
 	}
-
 	while (*src != '\0')
 	{
 		if (i < n)
@@ -57,10 +61,10 @@ char *_strncat(char *dest, const char *src, size_t n)
 			break;
 		}
 	}
-	
 	*dest = '\0';
-	
 	return (original_dest);
+	*/
+	return (strncat(dest, src, n));
 }
 
 char *_strcpy(char *dest, const char *src)
@@ -77,10 +81,13 @@ char *_strcpy(char *dest, const char *src)
 */
 int _strcmp(const char *s1, const char *s2)
 {
+	/*
 	while (*s1 && (*s1 == *s2))
 	{
 		s1++;
 		s2++;
 	}
 	return (*s1 - *s2);
+	*/
+	return (strcmp(s1, s2));
 }
