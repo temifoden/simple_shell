@@ -208,7 +208,7 @@ int main(int ac,  char **av)
 		{
 			for(i = 0; environ[i]; i++)
 				puts(environ[i]);
-
+			goto reprompt;
 		}
 		command = findCommand(sh, tokens[0]);
 		if (command == NULL)
