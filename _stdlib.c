@@ -30,8 +30,3 @@ char *_strcpy(char *dest, const char *src)
 {
 	return (strcpy(dest, src));
 }
-
-char *_getenv(const char *name)
-{
-	return (getenv(name));
-}
