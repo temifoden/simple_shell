@@ -30,3 +30,8 @@ char *_strcpy(char *dest, const char *src)
 {
 	return (strcpy(dest, src));
 }
+
+int _strcmp(const char *s1, const char *s2)
+{
+	return strcmp(s1, s2);
+}

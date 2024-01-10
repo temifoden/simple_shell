@@ -8,5 +8,19 @@
  */
 char *_getenv(const char *name)
 {
-	return (getenv(name));
+	int i = 0;
+	int j = 0;
+
+	if (environ == NULL)
+		return (NULL);
+	while (environ[i])
+	{
+		j = 0;
+		while (name[j] && environ[i][j] == name[j])
+			j++;
+		if (name[j] == '\0' && environ[i][j] == '=')
+			return (environ[i] + j + 1);
+		i++;
+	}
+	return (NULL);
 }

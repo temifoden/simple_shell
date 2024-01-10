@@ -92,7 +92,6 @@ int execute(shell_properties sh, char *command, char **args)
  * @string: the string characters
  * @start: begining string
 */
-
 int start_with(char *string, char *start)
 {
 	int i;
@@ -207,9 +206,9 @@ int main(int ac,  char **av)
 		tokens = tokenize(sh, lineptr);
 		if (tokens == NULL)
 			goto reprompt;
-		if (strcmp("exit", tokens[0]) == 0)
+		if (_strcmp("exit", tokens[0]) == 0)
 			break;
-		if (strcmp("env", tokens[0]) == 0)
+		if (_strcmp("env", tokens[0]) == 0)
 		{
 			for(i = 0; environ[i]; i++)
 				puts(environ[i]);
