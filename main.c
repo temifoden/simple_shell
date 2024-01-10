@@ -192,14 +192,10 @@ int main(int ac,  char **av)
 		_puts("file execution not constructed, come back later");
 		return (0);
 	}
-	if (!sh.isatty) /* running shell by piping input into it */
-	{
-		_puts("pipes not constructed, come back later");
-		return (0);
-	}
 
 	/* running the shell in interactive mode */
-	printf("$ ");
+	if (sh.isatty)
+		printf("$ ");
 	len = getline(&lineptr, &n, stdin);
 	while (len != -1) /* getline returns -1 when it reaches eof */
 	{
@@ -226,10 +222,11 @@ reprompt:
 		command = NULL;
 		free(tokens);
 		tokens = NULL; /* precaution */
-		printf("$ "); /* prompt the user again and again */
+		if (sh.isatty)
+			printf("$ "); /* prompt the user again and again */
 		len = getline(&lineptr, &n, stdin);
 	}
-	if (len == -1)
+	if (len == -1 && sh.isatty)
 		_puts("");
 
 	if (tokens && command != tokens[0])
