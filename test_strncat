@@ -3,9 +3,7 @@
 int main(int ac, char **av)
 {
     char stream[100] = "";
-    _strncat(stream, av[1], _strlen(av[1]));
-    
-    _strncat(stream, av[2], _strlen(av[2]));
+    _strcpy(stream, av[1]);
     printf("printf stream %s\n",stream);
     return(0);
     

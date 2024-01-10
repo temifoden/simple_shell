@@ -126,7 +126,7 @@ char *findCommand(shell_properties sh, char *command)
 	/*please work on this*/
 	if (!_getenv("PATH"))
 	{
-		printf("The path could not be found\n");
+		_puts("The path could not be found\n");
 		return (NULL);
 	}
 	path_copy = malloc(sizeof (char) * (_strlen(_getenv("PATH")) + 1));
@@ -189,13 +189,13 @@ int main(int ac,  char **av)
 	sh.isatty = isatty(STDIN_FILENO);
 	if (ac > 1) /* passing the shell a script (a file)*/
 	{
-		_puts("file execution not constructed, come back later");
+		_puts("file execution not constructed, come back later\n");
 		return (0);
 	}
 
 	/* running the shell in interactive mode */
 	if (sh.isatty)
-		printf("$ ");
+		_puts("$ ");
 	len = getline(&lineptr, &n, stdin);
 	while (len != -1) /* getline returns -1 when it reaches eof */
 	{
@@ -207,7 +207,10 @@ int main(int ac,  char **av)
 		if (_strcmp("env", tokens[0]) == 0)
 		{
 			for(i = 0; environ[i]; i++)
-				puts(environ[i]);
+			{
+				_puts(environ[i]);
+				_puts("\n");
+			}
 			goto reprompt;
 		}
 		command = findCommand(sh, tokens[0]);
@@ -223,11 +226,11 @@ reprompt:
 		free(tokens);
 		tokens = NULL; /* precaution */
 		if (sh.isatty)
-			printf("$ "); /* prompt the user again and again */
+			_puts("$ "); /* prompt the user again and again */
 		len = getline(&lineptr, &n, stdin);
 	}
 	if (len == -1 && sh.isatty)
-		_puts("");
+		_puts("\n");
 
 	if (tokens && command != tokens[0])
 		free(command);

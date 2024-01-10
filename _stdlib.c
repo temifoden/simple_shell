@@ -1,4 +1,5 @@
 #include "main.h"
+#include <stddef.h>
 #include <string.h>
 
 /**
@@ -8,7 +9,6 @@
  */
 size_t _strlen(const char *s)
 {
-	/*
 	size_t length = 0;
 	while(*s != '\0')
 	{
@@ -16,19 +16,16 @@ size_t _strlen(const char *s)
 		s++;
 	}
 	return (length);
-	*/
-	return (strlen(s));
 }
 
 /**
- * _puts - write a string to stdout, followed by newline
+ * _puts - write a string to stdout
  * @str: the string
  * Return: void
  */
 void _puts(const char *str)
 {
 	write(STDOUT_FILENO, str, _strlen(str));
-	write(STDOUT_FILENO, "\n", 1);
 }
 
 /**
@@ -39,7 +36,6 @@ void _puts(const char *str)
 */
 char *_strncat(char *dest, const char *src, size_t n)
 {
-	/*
 	char *original_dest = dest;
 	size_t i;
 	i = 0;
@@ -63,13 +59,17 @@ char *_strncat(char *dest, const char *src, size_t n)
 	}
 	*dest = '\0';
 	return (original_dest);
-	*/
-	return (strncat(dest, src, n));
 }
 
 char *_strcpy(char *dest, const char *src)
 {
-	return (strcpy(dest, src));
+	size_t i = 0;
+	for (i = 0; src[i]; i++)
+	{
+		dest[i] = src[i];
+	}
+	dest[i] = '\0';
+	return (dest);
 }
 
 /**
@@ -81,13 +81,10 @@ char *_strcpy(char *dest, const char *src)
 */
 int _strcmp(const char *s1, const char *s2)
 {
-	/*
 	while (*s1 && (*s1 == *s2))
 	{
 		s1++;
 		s2++;
 	}
 	return (*s1 - *s2);
-	*/
-	return (strcmp(s1, s2));
 }
