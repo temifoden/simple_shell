@@ -98,7 +98,7 @@ int execute(shell_properties sh, char *command, char **args)
  * @command: command string
  * Return: full path to the command, NULL if not found
 */
-char *findCommand(shell_properties sh, char *command)
+char *findCommand(shell_properties *sh, char *command)
 {
 	struct stat st;
 	char *path_copy, *dir_path, *full_path;
@@ -109,7 +109,7 @@ char *findCommand(shell_properties sh, char *command)
 	{
 		if (stat(command, &st) == -1)
 		{
-			perror(sh.prog_name);
+			perror(sh->prog_name);
 			return (NULL);
 		}
 		return (command);
@@ -123,7 +123,7 @@ char *findCommand(shell_properties sh, char *command)
 	path_copy = malloc(sizeof(char) * (_strlen(_getenv("PATH")) + 1));
 	if (path_copy == NULL)
 	{
-		perror(sh.prog_name);
+		perror(sh->prog_name);
 		return (NULL);
 	}
 
@@ -136,7 +136,7 @@ char *findCommand(shell_properties sh, char *command)
 				* (_strlen(dir_path) + _strlen(command) + 2));
 		if (!full_path)
 		{
-			perror(sh.prog_name);
+			perror(sh->prog_name);
 			free(path_copy);
 			return (NULL);
 		}
@@ -154,9 +154,13 @@ char *findCommand(shell_properties sh, char *command)
 		full_path = NULL;
 		dir_path = strtok(NULL, ":");
 	}
-	perror(sh.prog_name);
+	_puts(sh->prog_name);
+	_puts(": 1: ");
+	_puts(command);
+	_puts(": not found\n");
 	free(path_copy);
 	free(full_path);
+	sh->exit_status = 127;
 	return (NULL);
 }
 
@@ -179,6 +183,7 @@ int main(int ac,  char **av)
 
 	sh.prog_name = av[0];
 	sh.isatty = isatty(STDIN_FILENO);
+	sh.exit_status = 0;
 	if (ac > 1) /* passing the shell a script (a file)*/
 	{
 		_puts("file execution not constructed, come back later\n");
@@ -205,7 +210,7 @@ int main(int ac,  char **av)
 			}
 			goto reprompt;
 		}
-		command = findCommand(sh, tokens[0]);
+		command = findCommand(&sh, tokens[0]);
 		if (command == NULL)
 			goto reprompt;
 		if (execute(sh, command, tokens) == 1)
@@ -228,5 +233,5 @@ reprompt:
 		free(command);
 	free(tokens);
 	free(lineptr);
-	return (0);
+	return (sh.exit_status);
 }

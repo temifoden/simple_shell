@@ -21,6 +21,7 @@ typedef struct shell_properties
 {
 	char *prog_name;
 	int isatty;
+	int exit_status;
 } shell_properties;
 
 extern char **environ;
