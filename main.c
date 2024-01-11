@@ -1,8 +1,6 @@
 #include "main.h"
 #include "_stdlib.h"
 
-
-
 /**
  * isdelim - determines whether a char is a delimiter character or not
  * @c: the char
@@ -117,7 +115,11 @@ char *findCommand(shell_properties *sh, char *command)
 	/*please work on this*/
 	if (!_getenv("PATH"))
 	{
-		_puts("The path could not be found\n");
+		_puts_err(sh->prog_name);
+		_puts_err(": 1: ");
+		_puts_err(command);
+		_puts_err(": not found\n");
+		sh->exit_status = 127;
 		return (NULL);
 	}
 	path_copy = malloc(sizeof(char) * (_strlen(_getenv("PATH")) + 1));
