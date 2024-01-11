@@ -154,10 +154,10 @@ char *findCommand(shell_properties *sh, char *command)
 		full_path = NULL;
 		dir_path = strtok(NULL, ":");
 	}
-	_puts(sh->prog_name);
-	_puts(": 1: ");
-	_puts(command);
-	_puts(": not found\n");
+	_puts_err(sh->prog_name);
+	_puts_err(": 1: ");
+	_puts_err(command);
+	_puts_err(": not found\n");
 	free(path_copy);
 	free(full_path);
 	sh->exit_status = 127;

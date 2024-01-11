@@ -1,6 +1,7 @@
 #include "main.h"
 #include <stddef.h>
 #include <string.h>
+#include <unistd.h>
 
 /**
  * _strlen - returns the length of a string
@@ -27,6 +28,16 @@ size_t _strlen(const char *s)
 void _puts(const char *str)
 {
 	write(STDOUT_FILENO, str, _strlen(str));
+}
+
+/**
+ * _puts_err - write a string to stderr
+ * @str: the string
+ * Return: void
+ */
+void _puts_err(const char *str)
+{
+	write(STDERR_FILENO, str, _strlen(str));
 }
 
 /**
