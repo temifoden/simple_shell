@@ -1,5 +1,8 @@
 #include "main.h"
 #include "_stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 /**
  * isdelim - determines whether a char is a delimiter character or not
@@ -185,6 +188,8 @@ int main(int ac,  char **av)
 	char **tokens = NULL; /*array of tokens gotten from tokenize. */
 	char *command = NULL;
 	shell_properties sh;
+	char *old_pwd = NULL;
+	char *pwd = NULL;
 
 	int i;
 
@@ -199,7 +204,10 @@ int main(int ac,  char **av)
 
 	/* running the shell in interactive mode */
 	if (sh.isatty)
+	{
+		_puts(getenv("PWD"));
 		_puts("$ ");
+	}
 	len = getline(&lineptr, &n, stdin);
 	while (len != -1) /* getline returns -1 when it reaches eof */
 	{
@@ -218,6 +226,61 @@ int main(int ac,  char **av)
 			sh.exit_status = 0;
 			goto reprompt;
 		}
+		if (_strcmp("cd", tokens[0]) == 0)
+		{
+			old_pwd = getcwd(NULL, 0);
+			if (!old_pwd)
+				perror("getcwd"); /*set exit_status?*/
+			else if (!tokens[1])
+			{
+				if (chdir(getenv("HOME")) == 0)
+				{
+					pwd = getcwd(NULL, 0);
+					setenv("OLDPWD", old_pwd, 1);
+					setenv("PWD", pwd, 1);
+					free(pwd);
+					pwd = NULL;
+				}
+			}
+			else if (_strcmp("-", tokens[1]) == 0)
+			{
+				if (chdir(getenv("OLDPWD")) == 0)
+				{
+					pwd = getcwd(NULL, 0);
+					setenv("PWD", pwd, 1);
+					setenv("OLDPWD", old_pwd, 1);
+					free(pwd);
+					pwd = NULL;
+				}
+			}
+			else
+			{
+				if (chdir(tokens[1]) == 0)
+				{
+					pwd = getcwd(NULL, 0);
+					setenv("OLDPWD", old_pwd, 1);
+					setenv("PWD", pwd, 1);
+					free(pwd);
+					pwd = NULL;
+				}
+				else
+				{
+
+					/* /hsh: 1: cd: can't cd to /hbtn */
+					_puts_err(sh.prog_name);
+					_puts_err(": 1: ");
+					_puts_err("cd: ");
+					_puts_err("can't cd to ");
+					_puts_err(tokens[1]);
+					_puts_err("\n");
+				}
+
+
+			}
+			free(old_pwd);
+			old_pwd = NULL;
+			goto reprompt;
+		}
 		command = findCommand(&sh, tokens[0]);
 		if (command == NULL)
 			goto reprompt;
@@ -231,7 +294,10 @@ reprompt:
 		free(tokens);
 		tokens = NULL; /* precaution */
 		if (sh.isatty)
-			_puts("$ "); /* prompt the user again and again */
+		{
+			_puts(getenv("PWD"));
+			_puts("$ ");
+		}
 		len = getline(&lineptr, &n, stdin);
 	}
 	if (len == -1 && sh.isatty)

@@ -22,3 +22,6 @@ _strlen
 # peter
 getenv
 strtok
+
+write atoi
+write isnum
