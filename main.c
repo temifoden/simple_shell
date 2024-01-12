@@ -174,6 +174,27 @@ char *findCommand(shell_properties *sh, char *command)
 	return (NULL);
 }
 
+int is_num(char *str)
+{
+	int i;
+	for (i = 0; str[i]; i++)
+	{
+		if (i == 0)
+		{
+			if ((str[i] < '0' || str[i] > '9') && str[i] != '+' && str[i] != '-')
+				return 0;
+		}
+		else
+		{
+			if ((str[i] < '0' || str[i] > '9'))
+				return 0;
+		}
+	}
+	if ((str[0] == '+' || str[0] == '-') && i == 1)
+		return (0);
+	return (1);
+}
+
 /**
  * main - entry point into this awesome shell
  * @ac: number of command line args
@@ -215,7 +236,33 @@ int main(int ac,  char **av)
 		if (tokens == NULL)
 			goto reprompt;
 		if (_strcmp("exit", tokens[0]) == 0)
+		{
+			if (tokens[1])
+			{
+				if (!is_num(tokens[1]))
+				{
+					_puts_err(sh.prog_name);
+					_puts_err(": 1: ");
+					_puts_err("exit: ");
+					_puts_err("Illegal number: ");
+					_puts_err(tokens[1]);
+					_puts_err("\n");
+					goto reprompt;
+				}
+				if (atoi(tokens[1]) < 0)
+				{
+					_puts_err(sh.prog_name);
+					_puts_err(": 1: ");
+					_puts_err("exit: ");
+					_puts_err("Illegal number: ");
+					_puts_err(tokens[1]);
+					_puts_err("\n");
+					goto reprompt;
+				}
+				sh.exit_status = atoi(tokens[1]);
+			}
 			break;
+		}
 		if (_strcmp("env", tokens[0]) == 0)
 		{
 			for (i = 0; environ[i]; i++)
