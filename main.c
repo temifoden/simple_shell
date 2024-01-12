@@ -252,6 +252,8 @@ int main(int ac,  char **av)
 					free(pwd);
 					pwd = NULL;
 				}
+				_puts(getenv("PWD"));
+				_puts("\n");
 			}
 			else
 			{
