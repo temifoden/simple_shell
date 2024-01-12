@@ -247,7 +247,6 @@ int main(int ac,  char **av)
 					_puts_err("Illegal number: ");
 					_puts_err(tokens[1]);
 					_puts_err("\n");
-					_puts_err("\n");
 					sh.exit_status = 2;
 					goto reprompt;
 				}
