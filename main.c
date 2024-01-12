@@ -62,29 +62,37 @@ char **tokenize(shell_properties sh, char *str)
  * @sh: shell properties, for perror
  * Return: 0 if success, -1 if error, 1 if error doing execve
 */
-int execute(shell_properties sh, char *command, char **args)
+int execute(shell_properties *sh, char *command, char **args)
 {
 	pid_t pid;
+	int wstatus;
 
 	pid = fork();
 	if (pid == 0)
 	{
 		execve(command, args, environ);
-		perror(sh.prog_name);
+		perror(sh->prog_name);
 		return (1);
 	}
 	else if (pid == -1)
 	{
-		perror(sh.prog_name);
+		perror(sh->prog_name);
 		return (-1);
 	}
 	else
 	{
-		if (wait(NULL) == -1)
+		if (wait(&wstatus) == -1)
 		{
-			perror(sh.prog_name);
+			perror(sh->prog_name);
 			return (-1);
 		}
+		if (WIFEXITED(wstatus))
+		{
+			sh->exit_status = WEXITSTATUS(wstatus);
+			printf("status: %d\n", WEXITSTATUS(wstatus));
+		}
+		else if (WIFSIGNALED(wstatus)) /*sus*/
+			printf("termed by signal: %d\n", WTERMSIG(wstatus));
 	}
 	return (0);
 }
@@ -210,12 +218,13 @@ int main(int ac,  char **av)
 				_puts(environ[i]);
 				_puts("\n");
 			}
+			sh.exit_status = 0;
 			goto reprompt;
 		}
 		command = findCommand(&sh, tokens[0]);
 		if (command == NULL)
 			goto reprompt;
-		if (execute(sh, command, tokens) == 1)
+		if (execute(&sh, command, tokens) == 1)
 			break;
 
 reprompt:
