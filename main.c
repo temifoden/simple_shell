@@ -89,10 +89,7 @@ int execute(shell_properties *sh, char *command, char **args)
 		if (WIFEXITED(wstatus))
 		{
 			sh->exit_status = WEXITSTATUS(wstatus);
-			printf("status: %d\n", WEXITSTATUS(wstatus));
-		}
-		else if (WIFSIGNALED(wstatus)) /*sus*/
-			printf("termed by signal: %d\n", WTERMSIG(wstatus));
+		} /*handle signals too? */
 	}
 	return (0);
 }
